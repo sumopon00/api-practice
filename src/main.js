@@ -26,6 +26,16 @@ const typeColors = {
   fairy: { bg: "#EC7F9A", text: "#1a1a1a" },
 };
 
+function createTypeHtml(types) {
+  let html = "";
+  types.forEach((t) => {
+    const bgColor = typeColors[t].bg;
+    const textColor = typeColors[t].text;
+    html += `<span style="background-color: ${bgColor}; color: ${textColor}">${t}</span>`;
+  });
+  return html;
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const pokemonName = inputName.value.toLowerCase();
@@ -33,56 +43,50 @@ form.addEventListener("submit", async (event) => {
     result.innerHTML = `<p>名前を入力してください</p>`
     return;
   };
-  const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
-  if (!response.ok) {
-    result.innerHTML = `
-      <p>ポケモンが見つかりませんでした</p>
-      <p>＊フォルム(見た目)違いがあるポケモンは、名前の後ろに追加の情報が必要になる場合があります</p>
-    `;
-    return;
-  }
-  const data = await response.json();
-  const id = data.id;
-  const name = data.name;
-  const type = data.types.map((slot) => {
-    return slot.type.name;
-  });
-  const image = data.sprites.front_default;
-
-  let typeHtml = "";
-  type.forEach((t) => {
-    const bgColor = typeColors[t].bg;
-    const textColor = typeColors[t].text;
-    typeHtml += `<span style="background-color: ${bgColor}; color: ${textColor}">${t}</span>`;
-  });
-
-  result.innerHTML = `
-    <p>name: ${name}</p>
-    <img src="${image}">
-    <p>id: #${id}</p>
-    <p>type: ${typeHtml}</p>  
-  `;
-
-  history.push({ image: image, name: pokemonName, type: type });
-  const pokemonHistory = history.slice(-5);
-
-  let historyHtml = "";
-  pokemonHistory.forEach((p) => {
-    let typeSpans = "";
-    p.type.forEach((t) => {
-      const bgColor = typeColors[t].bg;
-      const textColor = typeColors[t].text;
-      typeSpans += `<span style="background-color: ${bgColor}; color: ${textColor}">${t}</span>`
+  try {
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+    if (!response.ok) {
+      result.innerHTML = `
+        <p>ポケモンが見つかりませんでした</p>
+        <p>＊フォルム(見た目)違いがあるポケモンは、名前の後ろに追加の情報が必要になる場合があります</p>
+      `;
+      return;
+    }
+    const data = await response.json();
+    const id = data.id;
+    const name = data.name;
+    const type = data.types.map((slot) => {
+      return slot.type.name;
     });
-    historyHtml += `<li>
-      <img src="${p.image}">
-      <span>${p.name}</span>
-      <span>${typeSpans}</span>
-    </li>`;
-  });
+    const image = data.sprites.front_default;
 
-  historyList.innerHTML = `${historyHtml}`;
+    let typeHtml = createTypeHtml(type);
 
-  inputName.value = "";
-  console.log(data);
+    result.innerHTML = `
+      <p>name: ${name}</p>
+      <img src="${image}">
+      <p>id: #${id}</p>
+      <p>type: ${typeHtml}</p>  
+    `;
+
+    history.push({ image: image, name: pokemonName, type: type });
+    const pokemonHistory = history.slice(-5);
+
+    let historyHtml = "";
+    pokemonHistory.forEach((p) => {
+      let typeSpans = createTypeHtml(p.type);
+      historyHtml += `<li>
+        <img src="${p.image}">
+        <span>${p.name}</span>
+        <span>${typeSpans}</span>
+      </li>`;
+    });
+
+    historyList.innerHTML = `${historyHtml}`;
+
+    inputName.value = "";
+  } catch (error) {
+    console.error(error);
+    result.innerHTML = `<p>通信エラー</p>`
+  }
 });
