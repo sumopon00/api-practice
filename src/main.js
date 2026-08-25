@@ -6,24 +6,24 @@ const historyList = document.querySelector("#history-list");
 const history = [];
 
 const typeColors = {
-  normal: "#AEAEAE",
-  fire: "#F3AB72",
-  water: "#7DC3F2",
-  electric: "#E4D546",
-  grass: "#A3C23F",
-  ice: "#87E6F3",
-  fighting: "#DE716D",
-  poison: "#A47CC5",
-  ground: "#C3A953",
-  flying: "#74A6EB",
-  psychic: "#DD85EE",
-  bug: "#74C968",
-  rock: "#F2C94E",
-  ghost: "#746EAF",
-  dragon: "#F08E64",
-  dark: "#6D81CE",
-  steel: "#838AA2",
-  fairy: "#EC7F9A",
+  normal: { bg: "#AEAEAE", text: "#1a1a1a" },
+  fire: { bg: "#F3AB72", text: "#1a1a1a" },
+  water: { bg: "#7DC3F2", text: "#1a1a1a" },
+  electric: { bg: "#E4D546", text: "#1a1a1a" },
+  grass: { bg: "#A3C23F", text: "#1a1a1a" },
+  ice: { bg: "#87E6F3", text: "#1a1a1a" },
+  fighting: { bg: "#DE716D", text: "#1a1a1a" },
+  poison: { bg: "#A47CC5", text: "#f0f0f0" },
+  ground: { bg: "#C3A953", text: "#1a1a1a" },
+  flying: { bg: "#74A6EB", text: "#1a1a1a" },
+  psychic: { bg: "#DD85EE", text: "#1a1a1a" },
+  bug: { bg: "#74C968", text: "#1a1a1a" },
+  rock: { bg: "#F2C94E", text: "#1a1a1a" },
+  ghost: { bg: "#746EAF", text: "#f0f0f0" },
+  dragon: { bg: "#F08E64", text: "#1a1a1a" },
+  dark: { bg: "#6D81CE", text: "#f0f0f0" },
+  steel: { bg: "#838AA2", text: "#1a1a1a" },
+  fairy: { bg: "#EC7F9A", text: "#1a1a1a" },
 };
 
 form.addEventListener("submit", async (event) => {
@@ -35,11 +35,15 @@ form.addEventListener("submit", async (event) => {
   };
   const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
   if (!response.ok) {
-    result.innerHTML = `<p>ポケモンが見つかりませんでした</p>`;
+    result.innerHTML = `
+      <p>ポケモンが見つかりませんでした</p>
+      <p>＊フォルム(見た目)違いがあるポケモンは、名前の後ろに追加の情報が必要になる場合があります</p>
+    `;
     return;
   }
   const data = await response.json();
-
+  const id = data.id;
+  const name = data.name;
   const type = data.types.map((slot) => {
     return slot.type.name;
   });
@@ -47,30 +51,38 @@ form.addEventListener("submit", async (event) => {
 
   let typeHtml = "";
   type.forEach((t) => {
-    const color = typeColors[t];
-    typeHtml += `<span style="background-color: ${color}">・${t}</span>`;
+    const bgColor = typeColors[t].bg;
+    const textColor = typeColors[t].text;
+    typeHtml += `<span style="background-color: ${bgColor}; color: ${textColor}">${t}</span>`;
   });
 
   result.innerHTML = `
+    <p>name: ${name}</p>
     <img src="${image}">
-    ${typeHtml}  
+    <p>id: #${id}</p>
+    <p>type: ${typeHtml}</p>  
   `;
 
-  history.push({ name: pokemonName, type: type });
+  history.push({ image: image, name: pokemonName, type: type });
   const pokemonHistory = history.slice(-5);
 
   let historyHtml = "";
   pokemonHistory.forEach((p) => {
     let typeSpans = "";
     p.type.forEach((t) => {
-      const color = typeColors[t];
-      typeSpans += `<span style="background-color: ${color}">・${t}</span>`
+      const bgColor = typeColors[t].bg;
+      const textColor = typeColors[t].text;
+      typeSpans += `<span style="background-color: ${bgColor}; color: ${textColor}">${t}</span>`
     });
     historyHtml += `<li>
-      <p>${p.name}</p>
-      <p>${typeSpans}</p>
+      <img src="${p.image}">
+      <span>${p.name}</span>
+      <span>${typeSpans}</span>
     </li>`;
   });
 
   historyList.innerHTML = `${historyHtml}`;
+
+  inputName.value = "";
+  console.log(data);
 });
