@@ -59,9 +59,7 @@ form.addEventListener("submit", async (event) => {
       return slot.type.name;
     });
     const image = data.sprites.front_default;
-
     let typeHtml = createTypeHtml(type);
-
     result.innerHTML = `
       <p>name: ${name}</p>
       <img src="${image}">
@@ -71,7 +69,6 @@ form.addEventListener("submit", async (event) => {
 
     history.push({ image: image, name: pokemonName, type: type });
     const pokemonHistory = history.slice(-5);
-
     let historyHtml = "";
     pokemonHistory.forEach((p) => {
       let typeSpans = createTypeHtml(p.type);
@@ -81,7 +78,6 @@ form.addEventListener("submit", async (event) => {
         <span>${typeSpans}</span>
       </li>`;
     });
-
     historyList.innerHTML = `${historyHtml}`;
 
     inputName.value = "";
